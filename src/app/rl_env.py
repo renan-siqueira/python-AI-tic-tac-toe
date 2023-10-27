@@ -31,7 +31,7 @@ class TicTacToeEnv(gym.Env):
             else:
                 self.current_player = -1 if self.current_player == 1 else 1
         else:
-            reward = -10
+            reward = -2
             done = True
 
         return self.board, reward, done, {}

@@ -1,11 +1,21 @@
-from src.app.rl_env import TicTacToeEnv
-from src.app.agent import QLearningAgent
+import torch
 
+from src.app.rl_env import TicTacToeEnv
+from src.app.qlearning_agent import QLearningAgent
+from src.app.replay_memory import ReplayMemory
+
+
+print('GPU Available:', torch.cuda.is_available())
+
+# Verificando a disponibilidade da GPU
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 env = TicTacToeEnv()
-agent = QLearningAgent(env.action_space)
+agent = QLearningAgent(env.action_space, device)
+memory = ReplayMemory(1000)
 
 num_episodes = 5000
+BATCH_SIZE = 32
 for episode in range(num_episodes):
     obs = env.reset()
     done = False
@@ -13,7 +23,16 @@ for episode in range(num_episodes):
     while not done:
         action = agent.act(obs)
         next_obs, reward, done, info = env.step(action)
-        
+
+        memory.push((obs, action, reward, next_obs))
+
+        # A cada 10 episódios, treine usando amostras da Replay Memory
+        if len(memory) > BATCH_SIZE and episode % 10 == 0:
+            experiences = memory.sample(BATCH_SIZE)
+            for experience in experiences:
+                exp_obs, exp_action, exp_reward, exp_next_obs = experience
+                agent.learn(exp_obs, exp_action, exp_reward, exp_next_obs)
+
         if reward == -10:
             agent.learn(obs, action, -1, next_obs)
         else:
