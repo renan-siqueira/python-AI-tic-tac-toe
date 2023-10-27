@@ -60,12 +60,37 @@ def test_agents(agent_X, agent_O, env, num_tests):
                     print("Draw!")
 
 
+def play_human_vs_agent(agent_X, env):
+    print("You will play against Agent X. You are 'O' and the Agent is 'X'.")
+    obs = env.reset()
+    done = False
+    env.render()
+    
+    while not done:
+        if env.current_player == -1:  # Assuming human is player "O"
+            action = int(input("Enter your move (0-8): "))
+        else:
+            action = agent_X.act(obs)
+        
+        obs, reward, done, _ = env.step(action)
+        env.render()
+
+        if done:
+            if reward == 1:
+                print("Agent X won!")
+            elif reward == -1:
+                print("You won!")
+            else:
+                print("Draw!")
+
+
 def menu():
     print("Select an option:")
     print("1. Train agents from scratch")
     print("2. Continue training from saved model")
     print("3. Test using saved model")
-    choice = int(input("Enter your choice (1/2/3): "))
+    print("4. Play against a trained agent")
+    choice = int(input("Enter your choice (1/2/3/4): "))
     return choice
 
 
@@ -113,6 +138,14 @@ def main():
             test_agents(agent_X, agent_O, env, num_tests)
         else:
             print("No saved model found!")
+
+    elif choice == 4:
+        if os.path.exists('agent_X.pkl'):
+            print("Loading Agent X to play against you...")
+            agent_X.load('agent_X.pkl')
+            play_human_vs_agent(agent_X, env)
+        else:
+            print("No trained model for Agent X found! Train the agent first.")
 
     else:
         print("Invalid choice!")
