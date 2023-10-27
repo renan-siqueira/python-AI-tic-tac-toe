@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 
 
 class QLearningAgent:
@@ -37,3 +38,11 @@ class QLearningAgent:
 
         self.exploration_rate *= self.exploration_decay_rate
         self.exploration_rate = max(self.exploration_rate, self.min_exploration_rate)
+
+    def save(self, filename):
+        with open(filename, 'wb') as f:
+            pickle.dump(self.Q, f)
+
+    def load(self, filename):
+        with open(filename, 'rb') as f:
+            self.Q = pickle.load(f)
