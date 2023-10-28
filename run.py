@@ -19,14 +19,16 @@ def train_agents(agent_X, agent_O, env, num_episodes):
 
             if reward == -10:
                 if env.current_player == 1:
-                    agent_X.learn(obs, action, -1, next_obs)
+                    agent_X.learn(obs, action, -10, next_obs)  # penalize invalid moves heavily
                 else:
-                    agent_O.learn(obs, action, -1, next_obs)
+                    agent_O.learn(obs, action, -10, next_obs)  # penalize invalid moves heavily
             else:
                 if env.current_player == 1:
                     agent_X.learn(obs, action, reward, next_obs)
+                    agent_O.learn(obs, action, -reward, next_obs)  # Negative reward for the opponent
                 else:
-                    agent_O.learn(obs, action, -reward, next_obs)
+                    agent_O.learn(obs, action, reward, next_obs)
+                    agent_X.learn(obs, action, -reward, next_obs)  # Negative reward for the opponent
 
             obs = next_obs
 
@@ -89,12 +91,12 @@ def play_human_vs_agent(agent_X, env):
         env.render()
 
         if done:
-            if reward == 1:
-                print("Agent X won!")
-            elif reward == -1:
-                print("You won!")
-            else:
-                print("Draw!")
+            win_messages = {
+                1: "Agent X won!",
+                -10: "You won!",
+                0: "Draw!"
+            }
+            print(win_messages.get(reward, "Unexpected outcome"))
 
 
 def menu():
