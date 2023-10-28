@@ -10,21 +10,25 @@ class TicTacToeEnv(gym.Env):
         self.action_space = spaces.Discrete(9)
         self.observation_space = spaces.Box(low=-1, high=1, shape=(3, 3), dtype=np.int32)
         self.current_player = 1
+        self.steps_taken = 0
 
     def reset(self):
         self.board = np.zeros((3, 3))
         self.current_player = 1
+        self.steps_taken = 0
         return self.board
 
     def step(self, action):
         row, col = divmod(action, 3)
         done = False
         reward = 0
+        self.steps_taken += 1
 
         if self.board[row, col] == 0:
             self.board[row, col] = self.current_player
             if self.check_win():
-                reward = 1 if self.current_player == 1 else -1
+                # Give a large reward for winning and a large penalty for losing
+                reward = 10 if self.current_player == 1 else -10
                 done = True
             elif not 0 in self.board:
                 done = True
