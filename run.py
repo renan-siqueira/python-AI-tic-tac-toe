@@ -65,13 +65,26 @@ def play_human_vs_agent(agent_X, env):
     obs = env.reset()
     done = False
     env.render()
-    
+
     while not done:
         if env.current_player == -1:  # Assuming human is player "O"
-            action = int(input("Enter your move (0-8): "))
+            while True:
+                action = None
+                try:
+                    action = int(input("Enter your move (0-8): "))
+                except ValueError:
+                    print("Please enter a valid number between 0-8.")
+
+                row = action // 3
+                col = action % 3
+                if action is not None and (action < 0 or action > 8 or obs[row][col] != 0):
+                    print("Invalid move! Please choose an empty spot between 0-8.")
+                    continue
+                elif action is not None:
+                    break
         else:
             action = agent_X.act(obs)
-        
+
         obs, reward, done, _ = env.step(action)
         env.render()
 
@@ -98,7 +111,7 @@ def main():
     env = TicTacToeEnv()
     agent_X = QLearningAgent(env.action_space)
     agent_O = QLearningAgent(env.action_space)
-    
+
     choice = menu()
 
     if choice == 1:
@@ -109,31 +122,31 @@ def main():
         agent_X.save('agent_X.pkl')
         agent_O.save('agent_O.pkl')
         print("Agents saved successfully!")
-    
+
     elif choice == 2:
         if os.path.exists('agent_X.pkl') and os.path.exists('agent_O.pkl'):
             print("Loading saved agents...")
             agent_X.load('agent_X.pkl')
             agent_O.load('agent_O.pkl')
             print("Agents loaded successfully!")
-            
+
             num_episodes = int(input("Enter the number of additional episodes to train: "))
             train_agents(agent_X, agent_O, env, num_episodes)
-            
+
             # Save the continued training
             agent_X.save('agent_X.pkl')
             agent_O.save('agent_O.pkl')
             print("Agents updated and saved successfully!")
         else:
             print("No saved model found!")
-    
+
     elif choice == 3:
         if os.path.exists('agent_X.pkl') and os.path.exists('agent_O.pkl'):
             print("Loading saved agents for testing...")
             agent_X.load('agent_X.pkl')
             agent_O.load('agent_O.pkl')
             print("Agents loaded successfully!")
-            
+
             num_tests = 5
             test_agents(agent_X, agent_O, env, num_tests)
         else:
